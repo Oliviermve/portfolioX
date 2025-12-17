@@ -1,0 +1,61 @@
+# Django
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+
+# Database
+*.sqlite3
+*.db
+*.sqlite
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Django files
+/media/
+/staticfiles/
+/static/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Production
+*.tar.gz
+*.zip
+
+# Python
+.python-version

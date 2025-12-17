@@ -1,0 +1,16 @@
+*.pyc
+__pycache__/
+*.sqlite3
+.env
+/media/
+/staticfiles/
+/static/
+venv/
+.venv/
+.DS_Store
+
+
+
+"email": "Olivier@gmail.com",
+    "password": "newpassword123",
+    "password_confirmation": "

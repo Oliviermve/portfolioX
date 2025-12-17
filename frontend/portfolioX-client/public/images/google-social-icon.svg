@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+    <g id="logo_googleg_48dp" transform="translate(2.8, 2.25)">
+        <path id="Shape" d="M19.704,9.425A13.236,13.236,0,0,0,19.488,7.07H8.64v4.457h6.199a5.299,5.299,0,0,1-2.299,3.477v2.891h3.722a11.232,11.232,0,0,0,3.434-8.467Z" transform="translate(2.88 2.357)" fill="#4285f4" fill-rule="evenodd"/>
+        <path id="Shape-2" data-name="Shape" d="M11.214,19.613a10.998,10.998,0,0,0,7.625-2.791l-3.722-2.891a6.95,6.95,0,0,1-10.346-3.648H.919v2.984A11.52,11.52,0,0,0,11.214,19.613Z" transform="translate(0.306 3.427)" fill="#34a853" fill-rule="evenodd"/>
+        <path id="Shape-3" data-name="Shape" d="M5.074,12.122a6.81,6.81,0,0,1,0-4.378V4.76H1.225a11.534,11.534,0,0,0,0,10.346l3.848-2.984Z" transform="translate(0 1.587)" fill="#fbbc05" fill-rule="evenodd"/>
+        <path id="Shape-4" data-name="Shape" d="M11.214,4.582a6.223,6.223,0,0,1,4.404,1.723l3.312-3.312A11.071,11.071,0,0,0,11.214,0,11.52,11.52,0,0,0,.919,6.347l3.848,2.984a6.866,6.866,0,0,1,6.446-4.75Z" transform="translate(0.306)" fill="#ea4335" fill-rule="evenodd"/>
+    </g>
+</svg> 

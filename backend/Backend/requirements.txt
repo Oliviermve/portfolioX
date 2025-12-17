@@ -1,0 +1,8 @@
+# Python version
+python_version >= "3.8"
+# Django et API
+Django==4.2.25
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.1
+django-cors-headers==4.3.1
+django-filter==23.5

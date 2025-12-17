@@ -1,0 +1,102 @@
+{
+  "competences": [
+    {
+      "id_competence": 1,
+      "nom_competence": "Python",
+      "niveau_competence": "avance"
+    },
+    {
+      "id_competence": 2,
+      "nom_competence": "Django",
+      "niveau_competence": "avance"
+    },
+    {
+      "id_competence": 3,
+      "nom_competence": "JavaScript",
+      "niveau_competence": "intermediaire"
+    },
+    {
+      "id_competence": 4,
+      "nom_competence": "React",
+      "niveau_competence": "debutant"
+    },
+    {
+      "id_competence": 5,
+      "nom_competence": "PostgreSQL",
+      "niveau_competence": "intermediaire"
+    },
+    {
+      "id_competence": 6,
+      "nom_competence": "Docker",
+      "niveau_competence": "debutant"
+    }
+  ],
+  "templates": [
+    {
+      "id_template": 1,
+      "nom_template": "Moderne",
+      "description_template": "Design moderne et épuré avec animations",
+      "fichier_html": "templates/moderne.html",
+      "image_template": "templates_images/moderne.jpg"
+    },
+    {
+      "id_template": 2,
+      "nom_template": "Classique",
+      "description_template": "Style traditionnel et professionnel",
+      "fichier_html": "templates/classique.html",
+      "image_template": "templates_images/classique.jpg"
+    },
+    {
+      "id_template": 3,
+      "nom_template": "Créatif",
+      "description_template": "Design artistique et original",
+      "fichier_html": "templates/creatif.html",
+      "image_template": "templates_images/creatif.jpg"
+    }
+  ],
+  "projets": [
+    {
+      "id_projet": 1,
+      "titre_projet": "Site E-commerce",
+      "description_projet": "Plateforme de vente en ligne avec panier et paiement",
+      "langage_projet": "Django, React, PostgreSQL",
+      "lien_projet": "https://github.com/utilisateur/ecommerce"
+    },
+    {
+      "id_projet": 2,
+      "titre_projet": "Application de Gestion",
+      "description_projet": "Outil de gestion de projet avec tableau Kanban",
+      "langage_projet": "Python, FastAPI, Vue.js",
+      "lien_projet": "https://github.com/utilisateur/gestion-projet"
+    },
+    {
+      "id_projet": 3,
+      "titre_projet": "API REST Portfolio",
+      "description_projet": "API complète pour gestion de portfolios",
+      "langage_projet": "Django REST Framework, JWT",
+      "lien_projet": "https://github.com/utilisateur/portfolio-api"
+    }
+  ],
+  "contacts": [
+    {
+      "id_contact": 1,
+      "type_contact": "email",
+      "valeur_contact": "amoldkalash@gmail.com"
+    },
+    {
+      "id_contact": 2,
+      "type_contact": "github",
+      "valeur_contact": "github.com/utilisateur"
+    },
+    {
+      "id_contact": 3,
+      "type_contact": "linkedin",
+      "valeur_contact": "linkedin.com/in/utilisateur"
+    },
+    {
+      "id_contact": 4,
+      "type_contact": "telephone",
+      "valeur_contact": "+ 237 686590986"
+    }
+  ]
+}
