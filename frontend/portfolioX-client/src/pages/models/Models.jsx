@@ -456,7 +456,7 @@ const templates = [
     image: "/templates/templates8.jpg"
   },
    {
-    id: 8,
+    id: 9,
     title: "Modèle Élégant",
     category: "web designer",
     description: "Design sophistiqué, animations fluides",
@@ -464,7 +464,7 @@ const templates = [
     image: "/templates/templates9.jpg"
   },
    {
-    id: 8,
+    id: 10,
     title: "Modèle Élégant",
     category: "web designer",
     description: "Design sophistiqué, animations fluides",
@@ -720,15 +720,15 @@ const Models = () => {
     navigate(`/portfolioDetail/${portfolioId}`);
   };
 
-  // Sélectionner un modèle
+  // Sélectionner un modèle - MODIFIÉ POUR REDIRIGER VERS /template/:id
   const selectTemplate = (templateId) => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
     
-    // Ici, vous pouvez rediriger vers la création avec le modèle sélectionné
-    navigate(`/portfolio/create?template=${templateId}`);
+    // Rediriger vers la page de visualisation du template
+    navigate(`/template/${templateId}`);
   };
 
   // Créer un portfolio
@@ -836,7 +836,7 @@ const Models = () => {
           filteredTemplates.map((template) => (
             <div
               key={template.id}
-              onClick={() => navigate('/portfolio')}
+              onClick={() => selectTemplate(template.id)} // MODIFIÉ ICI
               className="w-full bg-gradient-to-br from-gray-50 via-white to-gray-50 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 hover:border-purple-300 overflow-hidden group"
             >
               {/* Image du modèle */}
@@ -884,7 +884,10 @@ const Models = () => {
                     </span>
                   </div>
                   <button 
-                 onClick={() => navigate('/login')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      selectTemplate(template.id);
+                    }}
                     className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-200 shadow-sm ${
                       isAuthenticated 
                         ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:shadow-md"
@@ -938,7 +941,7 @@ const Models = () => {
               <div 
                 key={template.id}
                 className="flex-shrink-0 w-48 cursor-pointer"
-                onClick={() => selectTemplate(template.id)}
+                onClick={() => selectTemplate(template.id)} // MODIFIÉ ICI
               >
                 <div className="rounded-lg overflow-hidden shadow-sm border border-gray-200">
                   <img 

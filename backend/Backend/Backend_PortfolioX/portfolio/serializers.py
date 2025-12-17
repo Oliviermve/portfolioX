@@ -186,13 +186,17 @@ class PortfolioCreateUpdateSerializer(serializers.ModelSerializer):
         model = Portfolio
         fields = [
             'titre', 'description', 'titre_professionnel', 'biographie',
-            'photo_profil', 'statut', 'theme_couleur', 'layout_type',
+            'photo_profil', 'photo_template', 'statut', 'theme_couleur', 'layout_type',  # Ajouté photo_template
             'meta_description', 'meta_keywords',
             'afficher_photo', 'afficher_competences', 'afficher_projets',
             'afficher_contacts', 'afficher_formations', 'afficher_experiences',
             'formations', 'experiences', 'langues', 'certifications', 'interets',
             'contacts_ids', 'competences_ids', 'projets_ids'
         ]
+        extra_kwargs = {
+            'photo_profil': {'required': False, 'allow_null': True},
+            'photo_template': {'required': False, 'allow_null': True}  # Important !
+        }
     
     def validate(self, data):
         request = self.context.get('request')
@@ -266,7 +270,7 @@ class PortfolioCreateUpdateSerializer(serializers.ModelSerializer):
         
         instance.save()
         return instance
-
+    
 # Serializer pour publier un portfolio
 class PortfolioPublishSerializer(serializers.Serializer):
     statut = serializers.ChoiceField(choices=Portfolio.STATUT_CHOICES)
@@ -298,3 +302,19 @@ class PortfolioPublishSerializer(serializers.Serializer):
         instance.save()
         
         return instance
+# Serializer spécifique pour les mises à jour avec fichiers (FormData)
+class PortfolioUpdateWithFilesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Portfolio
+        fields = [
+            'titre', 'description', 'titre_professionnel', 'biographie',
+            'photo_profil', 'photo_template', 'statut', 'theme_couleur', 'layout_type',
+            'meta_description', 'meta_keywords',
+            'afficher_photo', 'afficher_competences', 'afficher_projets',
+            'afficher_contacts', 'afficher_formations', 'afficher_experiences',
+            'formations', 'experiences', 'langues', 'certifications', 'interets'
+        ]
+        extra_kwargs = {
+            'photo_profil': {'required': False, 'allow_null': True},
+            'photo_template': {'required': False, 'allow_null': True}
+        }

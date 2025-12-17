@@ -82,12 +82,7 @@ class Projet(models.Model):
     est_public = models.BooleanField(default=True, verbose_name='Public')
     est_termine = models.BooleanField(default=True, verbose_name='Terminé')
     ordre = models.PositiveIntegerField(default=0, verbose_name='Ordre d\'affichage')
-    image_projet = models.ImageField(
-        upload_to='projet_photos/', 
-        blank=True, 
-        null=True, 
-        verbose_name='Photo du projet'
-    )
+    
     
     class Meta:
         verbose_name = 'Projet'
@@ -123,6 +118,12 @@ class Portfolio(models.Model):
         blank=True, 
         null=True, 
         verbose_name='Photo de profil'
+    )
+    photo_template = models.ImageField(
+        upload_to='portfolio_template/', 
+        blank=True, 
+        null=True, 
+        verbose_name='Photo de template'
     )
     
     # Statut et dates

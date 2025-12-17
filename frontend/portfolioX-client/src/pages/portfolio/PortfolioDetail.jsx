@@ -96,24 +96,24 @@ const ContactItem = ({ contact }) => {
         }
     };
 
-const getIcon = () => {
-    switch (contact.type_contact?.toLowerCase()) {
-        case 'email': 
-            return <img src="/icons/email.png" alt="" className="contact-icon" />;
-        case 'linkedin': 
-            return <img src="/icons/Linkedin.png" alt="" className="contact-icon" />;
-        case 'github': 
-            return <img src="/icons/github.png" alt="" className="contact-icon" />;
-        case 'website': 
-            return <img src="/icons/website.png" alt="" className="contact-icon" />;
-        case 'phone': 
-            return <img src="/icons/phone.png" alt="" className="contact-icon" />;
-        case 'twitter': 
-            return <img src="/icons/twitter.png" alt="" className="contact-icon" />;
-        default: 
-            return <img src="/icons/phone.png" alt="" className="contact-icon" />;
-    }
-};
+    const getIcon = () => {
+        switch (contact.type_contact?.toLowerCase()) {
+            case 'email': 
+                return <img src="/icons/email.png" alt="" className="contact-icon" />;
+            case 'linkedin': 
+                return <img src="/icons/Linkedin.png" alt="" className="contact-icon" />;
+            case 'github': 
+                return <img src="/icons/github.png" alt="" className="contact-icon" />;
+            case 'website': 
+                return <img src="/icons/website.png" alt="" className="contact-icon" />;
+            case 'phone': 
+                return <img src="/icons/phone.png" alt="" className="contact-icon" />;
+            case 'twitter': 
+                return <img src="/icons/twitter.png" alt="" className="contact-icon" />;
+            default: 
+                return <img src="/icons/phone.png" alt="" className="contact-icon" />;
+        }
+    };
 
     const getColorClass = () => {
         switch (contact.type_contact?.toLowerCase()) {
@@ -564,6 +564,7 @@ const PortfolioDetail = () => {
 
     const bannerUrl = getImageUrl(portfolio.banniere_image || portfolio.header_image || portfolio.photo_couverture || '');
     const avatarUrl = getImageUrl(portfolio.photo_profil || '');
+    const templateImageUrl = getImageUrl(portfolio.photo_template || '');
 
     // Calculer l'expérience totale
     const calculateTotalExperience = () => {
@@ -580,113 +581,128 @@ const PortfolioDetail = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50">
-            {/* Hero Section avec dégradé */}
-            <div className="relative overflow-hidden">
-                {/* Banner */}
-                <div className="h-72 w-full">
-                    {bannerUrl ? (
-                        <img
-                            src={bannerUrl}
-                            alt="Bannière"
-                            className="w-full h-full object-cover"
-                            onError={(e) => { e.target.style.display = 'none'; }}
-                        />
-                    ) : (
-                        <div className="w-full h-full bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600"></div>
-                    )}
-                    {/* Overlay gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent"></div>
+        <div className="min-h-screen relative bg-gradient-to-b from-gray-50 via-white to-gray-50">
+            {/* Background avec photo_template */}
+            {templateImageUrl && (
+                <div className="fixed inset-0 z-0">
+                    <img
+                        src={templateImageUrl}
+                        alt="Template background"
+                        className="w-full h-full object-cover opacity-10"
+                        style={{ filter: 'blur(8px)' }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/90 to-white/80"></div>
                 </div>
+            )}
 
-                {/* Profile Card Overlay */}
-                <div className="container mx-auto px-4 lg:px-8 relative -mt-32">
-                    <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-                        {/* Profile Header */}
-                        <div className="p-8 lg:p-12">
-                            <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
-                                {/* Avatar */}
-                                <div className="relative">
-                                    <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-2xl overflow-hidden border-4 border-white shadow-xl">
-                                        {avatarUrl ? (
-                                            <img
-                                                src={avatarUrl}
-                                                alt={portfolio.titre}
-                                                className="w-full h-full object-cover"
-                                                onError={(e) => { e.target.style.display = 'none'; }}
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 text-white text-4xl">
-                                                {portfolio.titre?.charAt(0) || 'P'}
-                                            </div>
-                                        )}
-                                    </div>
-                                    {/* Online Status */}
-                                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 border-4 border-white rounded-full"></div>
-                                </div>
+            <div className="relative z-10">
+                {/* Hero Section avec dégradé */}
+                <div className="relative overflow-hidden">
+                    {/* Banner */}
+                    <div className="h-72 w-full relative">
+                        {bannerUrl ? (
+                            <img
+                                src={bannerUrl}
+                                alt="Bannière"
+                                className="w-full h-full object-cover"
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600"></div>
+                        )}
+                        {/* Overlay gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent"></div>
+                    </div>
 
-                                {/* Profile Info */}
-                                <div className="flex-1">
-                                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                                        <div>
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">
-                                                    {portfolio.titre || "Portfolio sans titre"}
-                                                </h1>
-                                                {portfolio.statut === 'publie' && (
-                                                    <span className="px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-bold rounded-full">
-                                                        🔥 PUBLIÉ
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <p className="text-xl text-gray-600 mb-4">
-                                                {portfolio.titre_professionnel || 'Professionnel créatif'}
-                                            </p>
-                                            <div className="flex flex-wrap gap-2 mb-6">
-                                                {portfolio.theme_couleur && (
-                                                    <span className="px-3 py-1.5 bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 text-sm font-medium rounded-full">
-                                                        {portfolio.theme_couleur}
-                                                    </span>
-                                                )}
-                                                <span className="px-3 py-1.5 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 text-sm font-medium rounded-full">
-                                                    Portfolio créatif
-                                                </span>
-                                            </div>
+                    {/* Profile Card Overlay */}
+                    <div className="container mx-auto px-4 lg:px-8 relative -mt-32">
+                        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden border border-white/50">
+                            {/* Profile Header */}
+                            <div className="p-8 lg:p-12">
+                                <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
+                                    {/* Avatar */}
+                                    <div className="relative">
+                                        <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-2xl overflow-hidden border-4 border-white shadow-xl">
+                                            {avatarUrl ? (
+                                                <img
+                                                    src={avatarUrl}
+                                                    alt={portfolio.titre}
+                                                    className="w-full h-full object-cover"
+                                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 text-white text-4xl">
+                                                    {portfolio.titre?.charAt(0) || 'P'}
+                                                </div>
+                                            )}
                                         </div>
-
-                                        {/* Action Buttons */}
-                                        <div className="flex gap-3">
-                                            <button
-                                                onClick={() => navigate('/models')}
-                                                className="px-6 py-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl hover:shadow-lg transition font-medium shadow-md"
-                                            >
-                                                ← Retour
-                                            </button>
-                                            <button
-                                                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition font-medium shadow-md"
-                                            >
-                                                📥 Contacter
-                                            </button>
-                                        </div>
+                                        {/* Online Status */}
+                                        <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 border-4 border-white rounded-full"></div>
                                     </div>
 
-                                    {/* Stats Bar */}
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-                                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-2xl">
-                                            <div className="text-2xl font-bold text-blue-700 mb-1">{projets.length}</div>
-                                            <div className="text-sm text-blue-600">Projets</div>
+                                    {/* Profile Info */}
+                                    <div className="flex-1">
+                                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                            <div>
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">
+                                                        {portfolio.titre || "Portfolio sans titre"}
+                                                    </h1>
+                                                    {portfolio.statut === 'publie' && (
+                                                        <span className="px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-bold rounded-full">
+                                                            🔥 PUBLIÉ
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-xl text-gray-600 mb-4">
+                                                    {portfolio.titre_professionnel || 'Professionnel créatif'}
+                                                </p>
+                                                <div className="flex flex-wrap gap-2 mb-6">
+                                                    {portfolio.theme_couleur && (
+                                                        <span className="px-3 py-1.5 bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 text-sm font-medium rounded-full">
+                                                            {portfolio.theme_couleur}
+                                                        </span>
+                                                    )}
+                                                    <span className="px-3 py-1.5 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 text-sm font-medium rounded-full">
+                                                        Portfolio créatif
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Action Buttons */}
+                                            <div className="flex gap-3">
+                                                <button
+                                                    onClick={() => navigate('/models')}
+                                                    className="px-6 py-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl hover:shadow-lg transition font-medium shadow-md"
+                                                >
+                                                    ← Retour
+                                                </button>
+                                                <button
+                                                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition font-medium shadow-md"
+                                                >
+                                                    📥 Contacter
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-2xl">
-                                            <div className="text-2xl font-bold text-green-700 mb-1">{competences.length}</div>
-                                            <div className="text-sm text-green-600">Compétences</div>
-                                        </div>
-                                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-2xl">
-                                            <div className="text-2xl font-bold text-purple-700 mb-1">{calculateTotalExperience()}</div>
-                                            <div className="text-sm text-purple-600">Années d'exp.</div>
-                                        </div>
-                                        <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-2xl">
-                                            <div className="text-2xl font-bold text-orange-700 mb-1">{contacts.length}</div>
-                                            <div className="text-sm text-orange-600">Contacts</div>
+
+                                        {/* Stats Bar */}
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                                            <div className="bg-gradient-to-br from-blue-50/90 to-blue-100/90 backdrop-blur-sm p-4 rounded-2xl border border-white/50">
+                                                <div className="text-2xl font-bold text-blue-700 mb-1">{projets.length}</div>
+                                                <div className="text-sm text-blue-600">Projets</div>
+                                            </div>
+                                            <div className="bg-gradient-to-br from-green-50/90 to-green-100/90 backdrop-blur-sm p-4 rounded-2xl border border-white/50">
+                                                <div className="text-2xl font-bold text-green-700 mb-1">{competences.length}</div>
+                                                <div className="text-sm text-green-600">Compétences</div>
+                                            </div>
+                                            <div className="bg-gradient-to-br from-purple-50/90 to-purple-100/90 backdrop-blur-sm p-4 rounded-2xl border border-white/50">
+                                                <div className="text-2xl font-bold text-purple-700 mb-1">{calculateTotalExperience()}</div>
+                                                <div className="text-sm text-purple-600">Années d'exp.</div>
+                                            </div>
+                                            <div className="bg-gradient-to-br from-orange-50/90 to-orange-100/90 backdrop-blur-sm p-4 rounded-2xl border border-white/50">
+                                                <div className="text-2xl font-bold text-orange-700 mb-1">{contacts.length}</div>
+                                                <div className="text-sm text-orange-600">Contacts</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -694,270 +710,270 @@ const PortfolioDetail = () => {
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Main Content */}
-            <main className="container mx-auto px-4 lg:px-8 mt-12">
-                <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Left Sidebar */}
-                    <aside className="w-full lg:w-1/3">
-                        <div className="space-y-6">
-                            {/* About Section */}
-                            <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl p-6 shadow-xl border border-gray-200">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                                        <span className="text-2xl text-white">👤</span>
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900">À propos</h3>
-                                </div>
-                                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                                    {portfolio.biographie || portfolio.description || "Aucune description fournie."}
-                                </p>
-                                {portfolio.date_creation && (
-                                    <div className="mt-6 pt-6 border-t border-gray-200">
-                                        <div className="flex items-center gap-3 text-gray-600">
-                                            <span className="text-lg">📅</span>
-                                            <span>Membre depuis {new Date(portfolio.date_creation).toLocaleDateString('fr-FR', { 
-                                                day: 'numeric', 
-                                                month: 'long', 
-                                                year: 'numeric' 
-                                            })}</span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Contacts Section */}
-                            {contacts.length > 0 && (
-                                <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl p-6 shadow-xl border border-gray-200">
+                {/* Main Content */}
+                <main className="container mx-auto px-4 lg:px-8 mt-12">
+                    <div className="flex flex-col lg:flex-row gap-8">
+                        {/* Left Sidebar */}
+                        <aside className="w-full lg:w-1/3">
+                            <div className="space-y-6">
+                                {/* About Section */}
+                                <div className="bg-gradient-to-br from-white/90 to-gray-50/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/50">
                                     <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
-                                            <span className="text-2xl text-white">📞</span>
+                                        <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                                            <span className="text-2xl text-white">👤</span>
                                         </div>
-                                        <h3 className="text-xl font-bold text-gray-900">Contact</h3>
+                                        <h3 className="text-xl font-bold text-gray-900">À propos</h3>
                                     </div>
-                                    <div className="space-y-4">
-                                        {contacts.map((c, idx) => (
-                                            <ContactItem key={idx} contact={c} />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Skills Overview */}
-                            {competences.length > 0 && (
-                                <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl p-6 shadow-xl border border-gray-200">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
-                                            <span className="text-2xl text-white">💼</span>
-                                        </div>
-                                        <h3 className="text-xl font-bold text-gray-900">Compétences</h3>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {competences.slice(0, 8).map((s, i) => (
-                                            <div key={i} className="px-4 py-3 bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl hover:border-purple-300 transition">
-                                                <div className="text-sm font-semibold text-gray-900 mb-1">{s.nom_competence}</div>
-                                                {s.niveau_competence && (
-                                                    <div className="text-xs text-gray-500">{s.niveau_competence}</div>
-                                                )}
+                                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                                        {portfolio.biographie || portfolio.description || "Aucune description fournie."}
+                                    </p>
+                                    {portfolio.date_creation && (
+                                        <div className="mt-6 pt-6 border-t border-gray-200">
+                                            <div className="flex items-center gap-3 text-gray-600">
+                                                <span className="text-lg">📅</span>
+                                                <span>Membre depuis {new Date(portfolio.date_creation).toLocaleDateString('fr-FR', { 
+                                                    day: 'numeric', 
+                                                    month: 'long', 
+                                                    year: 'numeric' 
+                                                })}</span>
                                             </div>
-                                        ))}
-                                    </div>
-                                    {competences.length > 8 && (
-                                        <div className="mt-6 text-center">
-                                            <button className="px-4 py-2 text-purple-600 font-medium">
-                                                + {competences.length - 8} compétences
-                                            </button>
                                         </div>
                                     )}
                                 </div>
-                            )}
-                        </div>
-                    </aside>
 
-                    {/* Main Content Area */}
-                    <section className="w-full lg:w-2/3">
-                        {/* Projects Section */}
-                        <div className="mb-12">
-                            <div className="flex items-center justify-between mb-8">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center">
-                                        <span className="text-3xl text-white"></span>
+                                {/* Contacts Section */}
+                                {contacts.length > 0 && (
+                                    <div className="bg-gradient-to-br from-white/90 to-gray-50/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/50">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                                                <span className="text-2xl text-white">📞</span>
+                                            </div>
+                                            <h3 className="text-xl font-bold text-gray-900">Contact</h3>
+                                        </div>
+                                        <div className="space-y-4">
+                                            {contacts.map((c, idx) => (
+                                                <ContactItem key={idx} contact={c} />
+                                            ))}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h2 className="text-3xl font-bold text-gray-900">Projets récents</h2>
-                                        <p className="text-gray-600">{projets.length} projets créatifs</p>
+                                )}
+
+                                {/* Skills Overview */}
+                                {competences.length > 0 && (
+                                    <div className="bg-gradient-to-br from-white/90 to-gray-50/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/50">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                                                <span className="text-2xl text-white">💼</span>
+                                            </div>
+                                            <h3 className="text-xl font-bold text-gray-900">Compétences</h3>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {competences.slice(0, 8).map((s, i) => (
+                                                <div key={i} className="px-4 py-3 bg-gradient-to-r from-gray-50/90 to-white/90 backdrop-blur-sm border border-white/50 rounded-xl hover:border-purple-300 transition">
+                                                    <div className="text-sm font-semibold text-gray-900 mb-1">{s.nom_competence}</div>
+                                                    {s.niveau_competence && (
+                                                        <div className="text-xs text-gray-500">{s.niveau_competence}</div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {competences.length > 8 && (
+                                            <div className="mt-6 text-center">
+                                                <button className="px-4 py-2 text-purple-600 font-medium">
+                                                    + {competences.length - 8} compétences
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
+                                )}
+                            </div>
+                        </aside>
+
+                        {/* Main Content Area */}
+                        <section className="w-full lg:w-2/3">
+                            {/* Projects Section */}
+                            <div className="mb-12">
+                                <div className="flex items-center justify-between mb-8">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center">
+                                            <span className="text-3xl text-white"></span>
+                                        </div>
+                                        <div>
+                                            <h2 className="text-3xl font-bold text-gray-900">Projets récents</h2>
+                                            <p className="text-gray-600">{projets.length} projets créatifs</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {projets.length === 0 ? (
+                                        <div className="col-span-2 bg-gradient-to-br from-gray-50/90 to-white/90 backdrop-blur-sm p-12 rounded-3xl text-center border border-white/50">
+                                            <div className="w-24 h-24 mx-auto bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center text-4xl mb-6">
+                                                📁
+                                            </div>
+                                            <h3 className="text-2xl font-bold text-gray-800 mb-3">Aucun projet</h3>
+                                            <p className="text-gray-600 mb-6">Ce portfolio ne contient pas encore de projets publics.</p>
+                                        </div>
+                                    ) : (
+                                        projets.map((project, index) => (
+                                            <div key={index}>
+                                                <ProjectItem project={project} />
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {projets.length === 0 ? (
-                                    <div className="col-span-2 bg-gradient-to-br from-gray-50 to-white p-12 rounded-3xl text-center">
-                                        <div className="w-24 h-24 mx-auto bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center text-4xl mb-6">
-                                            📁
+                            {/* Experiences & Education */}
+                            <div className="space-y-12">
+                                {/* Experiences */}
+                                {experiences.length > 0 && (
+                                    <div>
+                                        <div className="flex items-center gap-4 mb-8">
+                                            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
+                                                <span className="text-3xl text-white">💼</span>
+                                            </div>
+                                            <div>
+                                                <h2 className="text-3xl font-bold text-gray-900">Expérience professionnelle</h2>
+                                                <p className="text-gray-600">{experiences.length} expériences</p>
+                                            </div>
                                         </div>
-                                        <h3 className="text-2xl font-bold text-gray-800 mb-3">Aucun projet</h3>
-                                        <p className="text-gray-600 mb-6">Ce portfolio ne contient pas encore de projets publics.</p>
-                                    </div>
-                                ) : (
-                                    projets.map((project, index) => (
-                                        <div key={index}>
-                                            <ProjectItem project={project} />
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
 
-                        {/* Experiences & Education */}
-                        <div className="space-y-12">
-                            {/* Experiences */}
-                            {experiences.length > 0 && (
-                                <div>
-                                    <div className="flex items-center gap-4 mb-8">
-                                        <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center">
-                                            <span className="text-3xl text-white">💼</span>
-                                        </div>
-                                        <div>
-                                            <h2 className="text-3xl font-bold text-gray-900">Expérience professionnelle</h2>
-                                            <p className="text-gray-600">{experiences.length} expériences</p>
-                                        </div>
-                                    </div>
+                                        <div className="space-y-6">
+                                            {experiences.map((exp, idx) => {
+                                                const startDate = exp.date_debut ? new Date(exp.date_debut) : null;
+                                                const endDate = exp.date_fin && exp.date_fin !== "présent" ? new Date(exp.date_fin) : null;
+                                                const duration = startDate ? 
+                                                    endDate ? 
+                                                        Math.round((endDate - startDate) / (1000 * 60 * 60 * 24 * 30.44 * 12) * 10) / 10 :
+                                                        Math.round((new Date() - startDate) / (1000 * 60 * 60 * 24 * 30.44 * 12) * 10) / 10 
+                                                    : null;
 
-                                    <div className="space-y-6">
-                                        {experiences.map((exp, idx) => {
-                                            const startDate = exp.date_debut ? new Date(exp.date_debut) : null;
-                                            const endDate = exp.date_fin && exp.date_fin !== "présent" ? new Date(exp.date_fin) : null;
-                                            const duration = startDate ? 
-                                                endDate ? 
-                                                    Math.round((endDate - startDate) / (1000 * 60 * 60 * 24 * 30.44 * 12) * 10) / 10 :
-                                                    Math.round((new Date() - startDate) / (1000 * 60 * 60 * 24 * 30.44 * 12) * 10) / 10 
-                                                : null;
-
-                                            return (
-                                                <div key={idx} className="group bg-gradient-to-br from-white to-gray-50 rounded-3xl p-6 shadow-lg border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:scale-[1.01]">
-                                                    <div className="flex flex-col lg:flex-row lg:items-start gap-6">
-                                                        <div className="flex-shrink-0">
-                                                            <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center">
-                                                                <span className="text-2xl">🏢</span>
+                                                return (
+                                                    <div key={idx} className="group bg-gradient-to-br from-white/90 to-gray-50/90 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/50 hover:border-blue-300 transition-all duration-300 hover:scale-[1.01]">
+                                                        <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+                                                            <div className="flex-shrink-0">
+                                                                <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center">
+                                                                    <span className="text-2xl">🏢</span>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-4">
-                                                                <div>
-                                                                    <h3 className="text-xl font-bold text-gray-900 mb-2">{exp.poste}</h3>
+                                                            <div className="flex-1">
+                                                                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-4">
+                                                                    <div>
+                                                                        <h3 className="text-xl font-bold text-gray-900 mb-2">{exp.poste}</h3>
+                                                                        <div className="flex items-center gap-3">
+                                                                            <span className="font-semibold text-blue-600">{exp.entreprise}</span>
+                                                                            {exp.lieu && <span className="text-gray-500">• {exp.lieu}</span>}
+                                                                        </div>
+                                                                    </div>
                                                                     <div className="flex items-center gap-3">
-                                                                        <span className="font-semibold text-blue-600">{exp.entreprise}</span>
-                                                                        {exp.lieu && <span className="text-gray-500">• {exp.lieu}</span>}
+                                                                        {duration && (
+                                                                            <span className="px-3 py-1 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 text-sm font-semibold rounded-full">
+                                                                                {duration} an{duration > 1 ? 's' : ''}
+                                                                            </span>
+                                                                        )}
                                                                     </div>
                                                                 </div>
-                                                                <div className="flex items-center gap-3">
-                                                                    {duration && (
-                                                                        <span className="px-3 py-1 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 text-sm font-semibold rounded-full">
-                                                                            {duration} an{duration > 1 ? 's' : ''}
-                                                                        </span>
+                                                                {exp.description && (
+                                                                    <p className="text-gray-700 leading-relaxed">{exp.description}</p>
+                                                                )}
+                                                                <div className="mt-6 text-sm text-gray-500">
+                                                                    {startDate && (
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span>📅</span>
+                                                                            <span>
+                                                                                {startDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })} 
+                                                                                {endDate ? 
+                                                                                    ` - ${endDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}` :
+                                                                                    ' - Présent'
+                                                                                }
+                                                                            </span>
+                                                                        </div>
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            {exp.description && (
-                                                                <p className="text-gray-700 leading-relaxed">{exp.description}</p>
-                                                            )}
-                                                            <div className="mt-6 text-sm text-gray-500">
-                                                                {startDate && (
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span>📅</span>
-                                                                        <span>
-                                                                            {startDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })} 
-                                                                            {endDate ? 
-                                                                                ` - ${endDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}` :
-                                                                                ' - Présent'
-                                                                            }
-                                                                        </span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Education */}
-                            {formations.length > 0 && (
-                                <div>
-                                    <div className="flex items-center gap-4 mb-8">
-                                        <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center">
-                                            <span className="text-3xl text-white">🎓</span>
-                                        </div>
-                                        <div>
-                                            <h2 className="text-3xl font-bold text-gray-900">Formation</h2>
-                                            <p className="text-gray-600">{formations.length} formations</p>
+                                                );
+                                            })}
                                         </div>
                                     </div>
+                                )}
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {formations.map((f, idx) => (
-                                            <div key={idx} className="bg-gradient-to-br from-white to-gray-50 rounded-3xl p-6 shadow-lg border border-gray-200 hover:border-green-300 transition-all duration-300 hover:scale-[1.01]">
-                                                <div className="flex items-center gap-4 mb-4">
-                                                    <div className="w-14 h-14 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl flex items-center justify-center">
-                                                        <span className="text-2xl">📚</span>
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="text-lg font-bold text-gray-900">{f.diplome}</h3>
-                                                        <p className="text-gray-600">{f.etablissement}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    {f.domaine && (
-                                                        <div className="flex items-center gap-2 text-gray-700">
-                                                            <span>🏷️</span>
-                                                            <span>{f.domaine}</span>
-                                                        </div>
-                                                    )}
-                                                    {f.annee_obtention && (
-                                                        <div className="flex items-center gap-2 text-gray-700">
-                                                            <span>📅</span>
-                                                            <span>Obtention : {f.annee_obtention}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
+                                {/* Education */}
+                                {formations.length > 0 && (
+                                    <div>
+                                        <div className="flex items-center gap-4 mb-8">
+                                            <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center">
+                                                <span className="text-3xl text-white">🎓</span>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </section>
-                </div>
+                                            <div>
+                                                <h2 className="text-3xl font-bold text-gray-900">Formation</h2>
+                                                <p className="text-gray-600">{formations.length} formations</p>
+                                            </div>
+                                        </div>
 
-                {/* Footer */}
-                <footer className="mt-16 pt-12 border-t border-gray-200">
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                        <div className="text-center md:text-left">
-                            <p className="text-gray-700 font-medium">Portfolio créé avec ❤️</p>
-                            <p className="text-gray-500 text-sm">PortfolioX • {new Date().getFullYear()}</p>
-                        </div>
-                        <div className="flex items-center gap-6">
-                            <button 
-                                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                                className="px-6 py-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl hover:shadow-lg transition"
-                            >
-                                ↑ Retour en haut
-                            </button>
-                            <button 
-                                onClick={() => navigate('/models')}
-                                className="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-purple-500 hover:text-purple-700 transition"
-                            >
-                                ← Voir d'autres portfolios
-                            </button>
-                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {formations.map((f, idx) => (
+                                                <div key={idx} className="bg-gradient-to-br from-white/90 to-gray-50/90 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/50 hover:border-green-300 transition-all duration-300 hover:scale-[1.01]">
+                                                    <div className="flex items-center gap-4 mb-4">
+                                                        <div className="w-14 h-14 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl flex items-center justify-center">
+                                                            <span className="text-2xl">📚</span>
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-lg font-bold text-gray-900">{f.diplome}</h3>
+                                                            <p className="text-gray-600">{f.etablissement}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        {f.domaine && (
+                                                            <div className="flex items-center gap-2 text-gray-700">
+                                                                <span>🏷️</span>
+                                                                <span>{f.domaine}</span>
+                                                            </div>
+                                                        )}
+                                                        {f.annee_obtention && (
+                                                            <div className="flex items-center gap-2 text-gray-700">
+                                                                <span>📅</span>
+                                                                <span>Obtention : {f.annee_obtention}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
                     </div>
-                </footer>
-            </main>
+
+                    {/* Footer */}
+                    <footer className="mt-16 pt-12 border-t border-gray-200">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div className="text-center md:text-left">
+                                <p className="text-gray-700 font-medium">Portfolio créé avec ❤️</p>
+                                <p className="text-gray-500 text-sm">PortfolioX • {new Date().getFullYear()}</p>
+                            </div>
+                            <div className="flex items-center gap-6">
+                                <button 
+                                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                                    className="px-6 py-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl hover:shadow-lg transition"
+                                >
+                                    ↑ Retour en haut
+                                </button>
+                                <button 
+                                    onClick={() => navigate('/models')}
+                                    className="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-xl hover:border-purple-500 hover:text-purple-700 transition"
+                                >
+                                    ← Voir d'autres portfolios
+                                </button>
+                            </div>
+                        </div>
+                    </footer>
+                </main>
+            </div>
         </div>
     );
 };

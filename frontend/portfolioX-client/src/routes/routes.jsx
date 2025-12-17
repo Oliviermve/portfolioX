@@ -11,6 +11,7 @@ import PortfolioDetail from '../pages/portfolio/PortfolioDetail'
 import MyPortfolio from '../pages/portfolio/MyPortfolio'
 import Models from '../pages/models/Models'
 import TemplatePreview from '../pages/editPage/components/template_preview'
+import TemplateDetail from '../pages/models/TemplateDetail'
 
 const AppRoutes = () => {
   return (
@@ -27,6 +28,7 @@ const AppRoutes = () => {
         <Route path="/my-portfolios" element={< MyPortfolio />}/>
         <Route path="models/" element={<Models/>}/>
         <Route path="templatePreview/" element={<TemplatePreview/>}/>
+        <Route path="/template/:id" element={<TemplateDetail />} />
       </Routes>
     </BrowserRouter>
   )

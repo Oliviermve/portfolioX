@@ -5,12 +5,13 @@ from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.db import transaction
 from django.utils import timezone
-from django.db import models  # Ajouter cette importation pour les statistiques
+from django.db import models
 
 from .models import Contact, Competence, Projet, Portfolio
 from .serializers import (
@@ -20,7 +21,8 @@ from .serializers import (
     PortfolioListSerializer,
     PortfolioDetailSerializer,
     PortfolioCreateUpdateSerializer,
-    PortfolioPublishSerializer
+    PortfolioPublishSerializer,
+    PortfolioUpdateWithFilesSerializer
 )
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -32,7 +34,6 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        # CORRECTION : Utiliser request.user directement
         return obj.utilisateur == request.user
 
 class PortfolioPermissions(permissions.BasePermission):
@@ -44,7 +45,6 @@ class PortfolioPermissions(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS and obj.is_published():
             return True
-        # CORRECTION : Utiliser request.user directement
         return obj.utilisateur == request.user
 
 class ContactViewSet(viewsets.ModelViewSet):
@@ -52,10 +52,6 @@ class ContactViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
 
     def get_permissions(self):
-        """
-        Permettre l'accès public aux actions de lecture (list, retrieve, principaux)
-        pour les contacts des portfolios publiés
-        """
         if self.action in ['list', 'retrieve', 'principaux', 'portfolio_contacts']:
             permission_classes = [permissions.AllowAny]
         else:
@@ -64,24 +60,17 @@ class ContactViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            # Utilisateur connecté : voir ses contacts
             return Contact.objects.filter(utilisateur=self.request.user)
         else:
-            # Utilisateur non connecté : voir les contacts des portfolios publiés
             return Contact.objects.filter(
                 portfolios__statut='publie'
             ).distinct()
     
     def perform_create(self, serializer):
-        # CORRECTION : Utiliser self.request.user directement
         serializer.save(utilisateur=self.request.user)
     
     @action(detail=False, methods=['get'])
     def principaux(self, request):
-        """
-        Récupérer les contacts principaux de tous les portfolios publiés
-        """
-        # Récupérer les contacts principaux des portfolios publiés
         contacts = Contact.objects.filter(
             portfolios__statut='publie',
             est_principal=True
@@ -95,7 +84,7 @@ class ContactViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(contacts, many=True)
         return Response(serializer.data)
     
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], url_path='portfolio-contacts/(?P<portfolio_id>[^/.]+)')
     def portfolio_contacts(self, request, portfolio_id=None):
         """Récupérer les contacts d'un portfolio spécifique (public)"""
         try:
@@ -118,10 +107,6 @@ class CompetenceViewSet(viewsets.ModelViewSet):
     ordering_fields = ['nom_competence', 'categorie', 'ordre', 'annees_experience']
     
     def get_permissions(self):
-        """
-        Permettre l'accès public aux actions de lecture pour les compétences visibles
-        des portfolios publiés
-        """
         if self.action in ['list', 'retrieve', 'par_categorie']:
             permission_classes = [permissions.AllowAny]
         else:
@@ -130,17 +115,14 @@ class CompetenceViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            # Utilisateur connecté : voir ses compétences
             return Competence.objects.filter(utilisateur=self.request.user)
         else:
-            # Utilisateur non connecté : voir les compétences visibles des portfolios publiés
             return Competence.objects.filter(
                 portfolios__statut='publie',
                 est_visible=True
             ).distinct()
     
     def perform_create(self, serializer):
-        # CORRECTION : Utiliser self.request.user directement
         serializer.save(utilisateur=self.request.user)
     
     @action(detail=False, methods=['get'])
@@ -164,10 +146,6 @@ class ProjetViewSet(viewsets.ModelViewSet):
     ordering_fields = ['titre_projet', 'date_realisation', 'ordre']
     
     def get_permissions(self):
-        """
-        Permettre l'accès public aux actions de lecture pour les projets publics
-        des portfolios publiés
-        """
         if self.action in ['list', 'retrieve', 'publics']:
             permission_classes = [permissions.AllowAny]
         else:
@@ -176,17 +154,14 @@ class ProjetViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            # Utilisateur connecté : voir ses projets
             return Projet.objects.filter(utilisateur=self.request.user)
         else:
-            # Utilisateur non connecté : voir les projets publics des portfolios publiés
             return Projet.objects.filter(
                 portfolios__statut='publie',
                 est_public=True
             ).distinct()
     
     def perform_create(self, serializer):
-        # CORRECTION : Utiliser self.request.user directement
         serializer.save(utilisateur=self.request.user)
     
     @action(detail=False, methods=['get'])
@@ -208,12 +183,20 @@ class PortfolioViewSet(viewsets.ModelViewSet):
     filterset_fields = ['statut', 'layout_type']
     ordering_fields = ['date_creation', 'date_modification', 'vue_count', 'titre']
     
+    # AJOUT IMPORTANT : Accepter FormData
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    
     def get_serializer_class(self):
         if self.action == 'list':
             return PortfolioListSerializer
         elif self.action in ['retrieve', 'stats']:
             return PortfolioDetailSerializer
-        elif self.action in ['create', 'update', 'partial_update']:
+        elif self.action == 'create':
+            return PortfolioCreateUpdateSerializer
+        elif self.action in ['update', 'partial_update']:
+            # Utiliser le serializer adapté pour FormData
+            if hasattr(self.request, 'content_type') and self.request.content_type == 'multipart/form-data':
+                return PortfolioUpdateWithFilesSerializer
             return PortfolioCreateUpdateSerializer
         elif self.action == 'publish':
             return PortfolioPublishSerializer
@@ -240,7 +223,6 @@ class PortfolioViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_authenticated:
             queryset = queryset.filter(statut='publie')
         elif not self.request.user.is_staff:
-            # CORRECTION : Utiliser self.request.user directement
             queryset = queryset.filter(
                 Q(statut='publie') | Q(utilisateur=self.request.user)
             )
@@ -256,7 +238,6 @@ class PortfolioViewSet(viewsets.ModelViewSet):
     
     @transaction.atomic
     def create(self, request, *args, **kwargs):
-        # CORRECTION : Utiliser request.user directement
         if Portfolio.objects.filter(utilisateur=request.user).exists():
             raise ValidationError("Vous avez déjà un portfolio")
         
@@ -278,10 +259,21 @@ class PortfolioViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
+        
+        # Utiliser le serializer adapté au type de contenu
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        
+        # Sauvegarder l'instance
+        self.perform_update(serializer)
+        
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+        
         return Response(serializer.data)
+    
+    def perform_update(self, serializer):
+        serializer.save()
     
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -294,7 +286,6 @@ class PortfolioViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def my_portfolio(self, request):
-        # CORRECTION : Supprimer la vérification hasattr
         try:
             portfolio = Portfolio.objects.get(utilisateur=request.user)
             serializer = PortfolioDetailSerializer(
@@ -394,7 +385,6 @@ class PortfolioViewSet(viewsets.ModelViewSet):
         portfolio = self.get_object()
         self.check_object_permissions(request, portfolio)
         
-        # CORRECTION : Utiliser request.user directement
         if Portfolio.objects.filter(utilisateur=request.user).exists():
             raise ValidationError("Vous avez déjà un portfolio")
         
@@ -478,7 +468,6 @@ class PortfolioViewSet(viewsets.ModelViewSet):
         
         try:
             contact = Contact.objects.get(id_contact=contact_id)
-            # CORRECTION : Utiliser request.user directement
             if contact.utilisateur != request.user:
                 raise PermissionDenied("Ce contact ne vous appartient pas")
             portfolio.contacts.add(contact)
@@ -504,7 +493,6 @@ class PortfolioViewSet(viewsets.ModelViewSet):
         
         try:
             competence = Competence.objects.get(id_competence=competence_id)
-            # CORRECTION : Utiliser request.user directement
             if competence.utilisateur != request.user:
                 raise PermissionDenied("Cette compétence ne vous appartient pas")
             portfolio.competences.add(competence)
@@ -530,7 +518,6 @@ class PortfolioViewSet(viewsets.ModelViewSet):
         
         try:
             projet = Projet.objects.get(id_projet=projet_id)
-            # CORRECTION : Utiliser request.user directement
             if projet.utilisateur != request.user:
                 raise PermissionDenied("Ce projet ne vous appartient pas")
             portfolio.projets.add(projet)
@@ -586,7 +573,6 @@ class PortfolioViewSet(viewsets.ModelViewSet):
         """
         portfolio = self.get_object()
         
-        # Vérifier si le portfolio est publié
         if not portfolio.is_published():
             return Response(
                 {"error": "Ce portfolio n'est pas publié"},
@@ -630,6 +616,33 @@ class PortfolioViewSet(viewsets.ModelViewSet):
         projets = portfolio.projets.filter(est_public=True)
         serializer = ProjetSerializer(projets, many=True)
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'], parser_classes=[MultiPartParser])
+    def upload_template_photo(self, request, pk=None):
+        """
+        Endpoint spécifique pour uploader l'image du template
+        """
+        portfolio = self.get_object()
+        
+        if 'photo_template' not in request.FILES:
+            return Response(
+                {'error': 'Le fichier photo_template est requis'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            portfolio.photo_template = request.FILES['photo_template']
+            portfolio.save()
+            
+            return Response({
+                'message': 'Photo de template téléchargée avec succès',
+                'photo_template_url': portfolio.photo_template.url if portfolio.photo_template else None
+            })
+        except Exception as e:
+            return Response(
+                {'error': f'Erreur lors du téléchargement: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 # ============================================================================
 # VUES PUBLIQUES POUR LES DONNÉES DE PORTFOLIO
@@ -643,16 +656,12 @@ class PortfolioPublicContactsAPIView(APIView):
     
     def get(self, request, portfolio_id):
         try:
-            # Récupérer le portfolio publié
             portfolio = Portfolio.objects.get(
                 id_portfolio=portfolio_id,
                 statut='publie'
             )
             
-            # Récupérer les contacts du portfolio
             contacts = portfolio.contacts.all()
-            
-            # Sérialiser les contacts
             serializer = ContactSerializer(contacts, many=True)
             
             return Response(serializer.data)
@@ -719,18 +728,15 @@ class PortfolioPublicDataAPIView(APIView):
     
     def get(self, request, portfolio_id):
         try:
-            # Récupérer le portfolio publié
             portfolio = Portfolio.objects.get(
                 id_portfolio=portfolio_id,
                 statut='publie'
             )
             
-            # Récupérer toutes les données associées
             contacts = portfolio.contacts.all()
             competences = portfolio.competences.filter(est_visible=True)
             projets = portfolio.projets.filter(est_public=True)
             
-            # Sérialiser toutes les données
             data = {
                 'portfolio': PortfolioDetailSerializer(portfolio).data,
                 'contacts': ContactSerializer(contacts, many=True).data,
@@ -754,32 +760,26 @@ class PublicPortfoliosAPIView(APIView):
     pagination_class = StandardResultsSetPagination
     
     def get(self, request):
-        # Récupérer tous les portfolios publiés
         portfolios = Portfolio.objects.filter(statut='publie')
         
-        # Pagination
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(portfolios, request)
         
         if page is not None:
-            # Pour chaque portfolio, récupérer les données associées
             data = []
             for portfolio in page:
                 portfolio_data = PortfolioListSerializer(portfolio).data
                 
-                # Ajouter les contacts principaux
                 contacts_principaux = portfolio.contacts.filter(est_principal=True)[:3]
                 portfolio_data['contacts_principaux'] = ContactSerializer(
                     contacts_principaux, many=True
                 ).data
                 
-                # Ajouter quelques compétences visibles
                 competences_visibles = portfolio.competences.filter(est_visible=True)[:5]
                 portfolio_data['competences_visibles'] = CompetenceSerializer(
                     competences_visibles, many=True
                 ).data
                 
-                # Ajouter quelques projets publics
                 projets_publics = portfolio.projets.filter(est_public=True)[:3]
                 portfolio_data['projets_publics'] = ProjetSerializer(
                     projets_publics, many=True
@@ -789,7 +789,6 @@ class PublicPortfoliosAPIView(APIView):
             
             return paginator.get_paginated_response(data)
         
-        # Si pas de pagination
         data = []
         for portfolio in portfolios:
             portfolio_data = PortfolioListSerializer(portfolio).data
@@ -809,23 +808,19 @@ class PublicCompetencesListAPIView(APIView):
     pagination_class = StandardResultsSetPagination
     
     def get(self, request):
-        # Récupérer toutes les compétences visibles des portfolios publiés
         competences = Competence.objects.filter(
             portfolios__statut='publie',
             est_visible=True
         ).distinct()
         
-        # Filtrer par catégorie si spécifié
         categorie = request.query_params.get('categorie', None)
         if categorie:
             competences = competences.filter(categorie=categorie)
         
-        # Filtrer par niveau si spécifié
         niveau = request.query_params.get('niveau', None)
         if niveau:
             competences = competences.filter(niveau_competence=niveau)
         
-        # Recherche si spécifiée
         search = request.query_params.get('search', None)
         if search:
             competences = competences.filter(
@@ -833,7 +828,6 @@ class PublicCompetencesListAPIView(APIView):
                 Q(description__icontains=search)
             )
         
-        # Pagination
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(competences, request)
         
@@ -851,13 +845,11 @@ class PublicCompetencesByCategoryAPIView(APIView):
     permission_classes = [permissions.AllowAny]
     
     def get(self, request):
-        # Récupérer toutes les compétences visibles des portfolios publiés
         competences = Competence.objects.filter(
             portfolios__statut='publie',
             est_visible=True
         ).distinct()
         
-        # Grouper par catégorie
         result = {}
         for competence in competences:
             categorie = competence.get_categorie_display()
@@ -877,7 +869,6 @@ class PublicCompetenceDetailAPIView(APIView):
     
     def get(self, request, competence_id):
         try:
-            # Récupérer la compétence uniquement si elle appartient à un portfolio publié
             competence = Competence.objects.get(
                 id_competence=competence_id,
                 portfolios__statut='publie',
@@ -901,23 +892,19 @@ class PublicProjetsListAPIView(APIView):
     pagination_class = StandardResultsSetPagination
     
     def get(self, request):
-        # Récupérer tous les projets publics des portfolios publiés
         projets = Projet.objects.filter(
             portfolios__statut='publie',
             est_public=True
         ).distinct()
         
-        # Filtrer par langage si spécifié
         langage = request.query_params.get('langage', None)
         if langage:
             projets = projets.filter(langage_projet__icontains=langage)
         
-        # Filtrer par état si spécifié
         termine = request.query_params.get('termine', None)
         if termine is not None:
             projets = projets.filter(est_termine=termine.lower() == 'true')
         
-        # Recherche si spécifiée
         search = request.query_params.get('search', None)
         if search:
             projets = projets.filter(
@@ -926,7 +913,6 @@ class PublicProjetsListAPIView(APIView):
                 Q(langage_projet__icontains=search)
             )
         
-        # Pagination
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(projets, request)
         
@@ -944,13 +930,11 @@ class PublicProjetsByLanguageAPIView(APIView):
     permission_classes = [permissions.AllowAny]
     
     def get(self, request):
-        # Récupérer tous les projets publics des portfolios publiés
         projets = Projet.objects.filter(
             portfolios__statut='publie',
             est_public=True
         ).distinct()
         
-        # Grouper par langage
         result = {}
         for projet in projets:
             langage = projet.langage_projet
@@ -970,7 +954,6 @@ class PublicProjetDetailAPIView(APIView):
     
     def get(self, request, projet_id):
         try:
-            # Récupérer le projet uniquement s'il appartient à un portfolio publié
             projet = Projet.objects.get(
                 id_projet=projet_id,
                 portfolios__statut='publie',
@@ -994,22 +977,18 @@ class PublicContactsListAPIView(APIView):
     pagination_class = StandardResultsSetPagination
     
     def get(self, request):
-        # Récupérer tous les contacts des portfolios publiés
         contacts = Contact.objects.filter(
             portfolios__statut='publie'
         ).distinct()
         
-        # Filtrer par type si spécifié
         type_contact = request.query_params.get('type', None)
         if type_contact:
             contacts = contacts.filter(type_contact=type_contact)
         
-        # Filtrer pour contacts principaux si spécifié
         principal = request.query_params.get('principal', None)
         if principal is not None:
             contacts = contacts.filter(est_principal=principal.lower() == 'true')
         
-        # Recherche si spécifiée
         search = request.query_params.get('search', None)
         if search:
             contacts = contacts.filter(
@@ -1017,7 +996,6 @@ class PublicContactsListAPIView(APIView):
                 Q(type_contact__icontains=search)
             )
         
-        # Pagination
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(contacts, request)
         
@@ -1036,7 +1014,6 @@ class PublicContactDetailAPIView(APIView):
     
     def get(self, request, contact_id):
         try:
-            # Récupérer le contact uniquement s'il appartient à un portfolio publié
             contact = Contact.objects.get(
                 id_contact=contact_id,
                 portfolios__statut='publie'
@@ -1063,13 +1040,11 @@ class PublicPortfolioStatsAPIView(APIView):
     
     def get(self, request, portfolio_id):
         try:
-            # Récupérer le portfolio publié
             portfolio = Portfolio.objects.get(
                 id_portfolio=portfolio_id,
                 statut='publie'
             )
             
-            # Récupérer les statistiques
             stats = {
                 'general': {
                     'vues': portfolio.vue_count,
@@ -1104,7 +1079,6 @@ class PublicPlatformStatsAPIView(APIView):
     permission_classes = [permissions.AllowAny]
     
     def get(self, request):
-        # Récupérer les statistiques globales
         stats = {
             'portfolios': {
                 'total': Portfolio.objects.count(),
@@ -1130,13 +1104,11 @@ class PublicPlatformStatsAPIView(APIView):
             }
         }
         
-        # Compétences par catégorie
         for categorie, _ in Competence.CATEGORIE_CHOICES:
             count = Competence.objects.filter(categorie=categorie, est_visible=True).count()
             if count > 0:
                 stats['competences']['par_categorie'][categorie] = count
         
-        # Projets par langage (top 10)
         langages = Projet.objects.filter(est_public=True).values('langage_projet').annotate(
             count=models.Count('id_projet')
         ).order_by('-count')[:10]
@@ -1162,7 +1134,6 @@ class PublicSearchAPIView(APIView):
         if not query:
             return Response({"error": "Paramètre de recherche 'q' requis"}, status=400)
         
-        # Rechercher dans les portfolios publiés
         portfolios = Portfolio.objects.filter(
             statut='publie'
         ).filter(
@@ -1172,7 +1143,6 @@ class PublicSearchAPIView(APIView):
             Q(biographie__icontains=query)
         ).distinct()
         
-        # Rechercher dans les compétences visibles
         competences = Competence.objects.filter(
             portfolios__statut='publie',
             est_visible=True
@@ -1181,7 +1151,6 @@ class PublicSearchAPIView(APIView):
             Q(description__icontains=query)
         ).distinct()
         
-        # Rechercher dans les projets publics
         projets = Projet.objects.filter(
             portfolios__statut='publie',
             est_public=True
@@ -1191,7 +1160,6 @@ class PublicSearchAPIView(APIView):
             Q(langage_projet__icontains=query)
         ).distinct()
         
-        # Préparer les résultats
         results = {
             'portfolios': PortfolioListSerializer(portfolios, many=True).data,
             'competences': CompetenceSerializer(competences, many=True).data,
