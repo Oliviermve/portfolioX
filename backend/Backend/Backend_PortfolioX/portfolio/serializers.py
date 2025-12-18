@@ -128,7 +128,7 @@ class PortfolioListSerializer(serializers.ModelSerializer):
     def get_is_published(self, obj):
         return obj.is_published()
 
-# Serializer pour Portfolio (Détail)
+# Serializer pour Portfolio (Détail) - CORRIGÉ
 class PortfolioDetailSerializer(serializers.ModelSerializer):
     utilisateur = UtilisateurSimpleSerializer(read_only=True)
     contacts = ContactSerializer(many=True, read_only=True)
@@ -141,8 +141,8 @@ class PortfolioDetailSerializer(serializers.ModelSerializer):
         model = Portfolio
         fields = [
             'id_portfolio', 'utilisateur', 'titre', 'slug', 'description',
-            'titre_professionnel', 'biographie', 'photo_profil', 'statut',
-            'date_creation', 'date_modification', 'date_publication',
+            'titre_professionnel', 'biographie', 'photo_profil', 'photo_template',  # Ajouté photo_template
+            'statut', 'date_creation', 'date_modification', 'date_publication',
             'contacts', 'competences', 'projets', 'vue_count',
             'theme_couleur', 'layout_type', 'meta_description', 'meta_keywords',
             'afficher_photo', 'afficher_competences', 'afficher_projets',
@@ -186,7 +186,7 @@ class PortfolioCreateUpdateSerializer(serializers.ModelSerializer):
         model = Portfolio
         fields = [
             'titre', 'description', 'titre_professionnel', 'biographie',
-            'photo_profil', 'photo_template', 'statut', 'theme_couleur', 'layout_type',  # Ajouté photo_template
+            'photo_profil', 'photo_template', 'statut', 'theme_couleur', 'layout_type',
             'meta_description', 'meta_keywords',
             'afficher_photo', 'afficher_competences', 'afficher_projets',
             'afficher_contacts', 'afficher_formations', 'afficher_experiences',
@@ -195,7 +195,7 @@ class PortfolioCreateUpdateSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {
             'photo_profil': {'required': False, 'allow_null': True},
-            'photo_template': {'required': False, 'allow_null': True}  # Important !
+            'photo_template': {'required': False, 'allow_null': True}
         }
     
     def validate(self, data):
@@ -270,7 +270,7 @@ class PortfolioCreateUpdateSerializer(serializers.ModelSerializer):
         
         instance.save()
         return instance
-    
+
 # Serializer pour publier un portfolio
 class PortfolioPublishSerializer(serializers.Serializer):
     statut = serializers.ChoiceField(choices=Portfolio.STATUT_CHOICES)
@@ -302,6 +302,7 @@ class PortfolioPublishSerializer(serializers.Serializer):
         instance.save()
         
         return instance
+
 # Serializer spécifique pour les mises à jour avec fichiers (FormData)
 class PortfolioUpdateWithFilesSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-// Configuration API (inchangée)
+// Configuration API
 const API_BASE_URL = 'http://localhost:8000';
 
-// Fonction utilitaire pour les appels API (inchangée)
+// Fonction utilitaire pour les appels API
 const fetchApi = async (endpoint, method = 'GET', data = null) => {
     const url = `${API_BASE_URL}${endpoint}`;
     
@@ -12,7 +12,7 @@ const fetchApi = async (endpoint, method = 'GET', data = null) => {
         'Content-Type': 'application/json',
     };
 
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('portfolioX_access_token');
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
     }
@@ -46,7 +46,7 @@ const fetchApi = async (endpoint, method = 'GET', data = null) => {
 };
 
 /* ===========================
-   UI Helper components - DESIGN AMÉLIORÉ
+   UI Helper components
    =========================== */
 
 // ContactItem - DESIGN MODERNE
@@ -78,21 +78,6 @@ const ContactItem = ({ contact }) => {
             return `mailto:${contact.valeur_contact}`;
         } else {
             return `https://${contact.valeur_contact}`;
-        }
-    };
-
-    const getTypeLabel = () => {
-        if (!contact.type_contact) return "Contact";
-        switch (contact.type_contact.toLowerCase()) {
-            case 'email': return 'Email professionnel';
-            case 'linkedin': return 'LinkedIn';
-            case 'github': return 'GitHub';
-            case 'website': return 'Site web';
-            case 'phone': return 'Téléphone';
-            case 'twitter': return 'Twitter / X';
-            case 'behance': return 'Behance';
-            case 'dribbble': return 'Dribbble';
-            default: return contact.type_contact;
         }
     };
 
@@ -140,7 +125,13 @@ const ContactItem = ({ contact }) => {
                 <span className="text-2xl">{getIcon()}</span>
             </div>
             <div className="flex-1">
-                <p className="font-bold text-sm mb-1">{getTypeLabel()}</p>
+                <p className="font-bold text-sm mb-1">
+                    {contact.type_contact === 'telephone' ? 'Téléphone' :
+                     contact.type_contact === 'linkedin' ? 'LinkedIn' :
+                     contact.type_contact === 'github' ? 'GitHub' :
+                     contact.type_contact === 'email' ? 'Email' :
+                     contact.type_contact || 'Contact'}
+                </p>
                 <p className="text-base font-medium break-all">{contact.valeur_contact || "Non spécifié"}</p>
             </div>
             {isClickable && (
@@ -388,7 +379,7 @@ const ProjectItem = ({ project }) => {
 };
 
 /* ===========================
-   MAIN COMPONENT (PortfolioDetail) - DESIGN AMÉLIORÉ
+   MAIN COMPONENT (PortfolioDetail)
    =========================== */
 
 const PortfolioDetail = () => {
@@ -408,6 +399,11 @@ const PortfolioDetail = () => {
     const [certifications, setCertifications] = useState([]);
     const [interets, setInterets] = useState([]);
 
+    // États pour les images
+    const [bannerUrl, setBannerUrl] = useState(null);
+    const [avatarUrl, setAvatarUrl] = useState(null);
+    const [templateImageUrl, setTemplateImageUrl] = useState(null);
+
     // Statistiques pour le header
     const [stats, setStats] = useState({
         totalProjects: 0,
@@ -416,21 +412,74 @@ const PortfolioDetail = () => {
         totalContacts: 0
     });
 
+    // Référence pour éviter les doubles appels
+    const isFetching = useRef(false);
+    const fetchedPortfolioId = useRef(null);
+
     useEffect(() => {
         const fetchPortfolioData = async () => {
+            // Éviter les doubles appels pour le même portfolio
+            if (isFetching.current || (fetchedPortfolioId.current === id && portfolio)) {
+                console.log('⏭️  Déjà en cours de chargement ou déjà chargé');
+                return;
+            }
+
             try {
+                isFetching.current = true;
+                fetchedPortfolioId.current = id;
                 setLoading(true);
                 setError(null);
 
+                console.log(`📡 Début chargement portfolio ${id}...`);
+
+                // Récupérer les données du portfolio
                 const portfolioData = await fetchApi(`/api/portfolio/portfolios/${id}/`);
 
                 if (portfolioData) {
+                    console.log('✅ Portfolio récupéré:', portfolioData);
+                    
+                    // Fonction pour obtenir l'URL complète
+                    const getImageUrl = (imagePath) => {
+                        if (!imagePath) return null;
+                        if (imagePath.startsWith('http')) return imagePath;
+                        if (imagePath.startsWith('/')) return `${API_BASE_URL}${imagePath}`;
+                        return `${API_BASE_URL}/media/${imagePath}`;
+                    };
+
+                    // Vérifier et mettre à jour photo_template
+                    if (portfolioData.photo_template) {
+                        const url = getImageUrl(portfolioData.photo_template);
+                        console.log('🖼️ Setting templateImageUrl to:', url);
+                        setTemplateImageUrl(url);
+                    } else {
+                        console.log('⚠️  Aucune photo_template trouvée');
+                        setTemplateImageUrl(null);
+                    }
+
+                    if (portfolioData.banniere_image || portfolioData.header_image || portfolioData.photo_couverture) {
+                        const bannerImage = portfolioData.banniere_image || 
+                                          portfolioData.header_image || 
+                                          portfolioData.photo_couverture;
+                        setBannerUrl(getImageUrl(bannerImage));
+                    } else {
+                        setBannerUrl(null);
+                    }
+
+                    if (portfolioData.photo_profil) {
+                        setAvatarUrl(getImageUrl(portfolioData.photo_profil));
+                    } else {
+                        setAvatarUrl(null);
+                    }
+
+                    // Mettre à jour les données principales
                     setFormations(portfolioData.formations || []);
                     setExperiences(portfolioData.experiences || []);
                     setLangues(portfolioData.langues || []);
                     setCertifications(portfolioData.certifications || []);
                     setInterets(portfolioData.interets || []);
+                    setPortfolio(portfolioData);
 
+                    // Charger les contacts, compétences et projets
                     let contactsList = [];
                     let competencesList = [];
                     let projetsList = [];
@@ -444,6 +493,7 @@ const PortfolioDetail = () => {
                             contactsList = contactsData.results;
                         }
                     } catch (e) {
+                        console.log('Erreur récupération contacts:', e.message);
                         contactsList = [];
                     }
 
@@ -456,6 +506,7 @@ const PortfolioDetail = () => {
                             competencesList = competencesData.results;
                         }
                     } catch (e) {
+                        console.log('Erreur récupération compétences:', e.message);
                         competencesList = [];
                     }
 
@@ -468,6 +519,7 @@ const PortfolioDetail = () => {
                             projetsList = projetsData.results;
                         }
                     } catch (e) {
+                        console.log('Erreur récupération projets:', e.message);
                         projetsList = [];
                     }
 
@@ -475,7 +527,6 @@ const PortfolioDetail = () => {
                     setContacts(contactsList);
                     setCompetences(competencesList);
                     setProjets(projetsList);
-                    setPortfolio(portfolioData);
                     
                     // Calculer l'expérience totale
                     const totalExperience = (portfolioData.experiences || []).reduce((sum, exp) => {
@@ -495,26 +546,51 @@ const PortfolioDetail = () => {
                         totalExperience: Math.round(totalExperience * 10) / 10,
                         totalContacts: contactsList.length
                     });
+                    
+                    console.log('🎉 Données portfolio chargées avec succès');
+                    console.log('🖼️ templateImageUrl final:', templateImageUrl);
                 }
 
             } catch (err) {
                 console.error('❌ Erreur:', err);
                 setError(`Impossible de charger le portfolio: ${err.message}`);
+                // Réinitialiser les refs en cas d'erreur
+                isFetching.current = false;
+                fetchedPortfolioId.current = null;
             } finally {
                 setLoading(false);
+                // Ne pas réinitialiser isFetching immédiatement pour éviter les doubles appels
+                setTimeout(() => {
+                    isFetching.current = false;
+                }, 100);
             }
         };
 
         if (id) {
             fetchPortfolioData();
         }
+
+        // Cleanup function
+        return () => {
+            // Réinitialiser si l'ID change
+            if (fetchedPortfolioId.current !== id) {
+                isFetching.current = false;
+                fetchedPortfolioId.current = null;
+            }
+        };
     }, [id]);
 
-    const getImageUrl = (imagePath) => {
-        if (!imagePath) return null;
-        if (imagePath.startsWith('http')) return imagePath;
-        if (imagePath.startsWith('/')) return `${API_BASE_URL}${imagePath}`;
-        return `${API_BASE_URL}/media/${imagePath}`;
+    const calculateTotalExperience = () => {
+        let totalYears = 0;
+        experiences.forEach(exp => {
+            if (exp.date_debut) {
+                const start = new Date(exp.date_debut);
+                const end = exp.date_fin === "présent" || !exp.date_fin ? new Date() : new Date(exp.date_fin);
+                const years = (end - start) / (1000 * 60 * 60 * 24 * 365.25);
+                totalYears += Math.max(0, years);
+            }
+        });
+        return Math.round(totalYears * 10) / 10;
     };
 
     if (loading) {
@@ -562,38 +638,26 @@ const PortfolioDetail = () => {
         );
     }
 
-    const bannerUrl = getImageUrl(portfolio.banniere_image || portfolio.header_image || portfolio.photo_couverture || '');
-    const avatarUrl = getImageUrl(portfolio.photo_profil || '');
-    const templateImageUrl = getImageUrl(portfolio.photo_template || '');
-
-    // Calculer l'expérience totale
-    const calculateTotalExperience = () => {
-        let totalYears = 0;
-        experiences.forEach(exp => {
-            if (exp.date_debut) {
-                const start = new Date(exp.date_debut);
-                const end = exp.date_fin === "présent" || !exp.date_fin ? new Date() : new Date(exp.date_fin);
-                const years = (end - start) / (1000 * 60 * 60 * 24 * 365.25);
-                totalYears += Math.max(0, years);
-            }
-        });
-        return Math.round(totalYears * 10) / 10;
-    };
-
     return (
         <div className="min-h-screen relative bg-gradient-to-b from-gray-50 via-white to-gray-50">
-            {/* Background avec photo_template */}
+            {/* Background avec photo_template - RENDU CLAIR SANS TRANSPARENCE */}
             {templateImageUrl && (
-                <div className="fixed inset-0 z-0">
-                    <img
-                        src={templateImageUrl}
-                        alt="Template background"
-                        className="w-full h-full object-cover opacity-10"
-                        style={{ filter: 'blur(8px)' }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/90 to-white/80"></div>
-                </div>
+                  <div className="fixed inset-0 z-0">
+  <img 
+    src={templateImageUrl}
+    alt="Background"
+    className="w-full h-full object-cover"
+    style={{
+      // Aucun zoom, image à sa taille normale
+      transform: 'none'
+    }}
+  />
+</div>
+               
             )}
+
+            {/* Overlay blanc semi-transparent pour améliorer la lisibilité du texte */}
+            <div className="fixed inset-0 z-1 bg-white/70 backdrop-blur-[2px]"></div>
 
             <div className="relative z-10">
                 {/* Hero Section avec dégradé */}
@@ -616,7 +680,7 @@ const PortfolioDetail = () => {
 
                     {/* Profile Card Overlay */}
                     <div className="container mx-auto px-4 lg:px-8 relative -mt-32">
-                        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden border border-white/50">
+                        <div className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-white/70">
                             {/* Profile Header */}
                             <div className="p-8 lg:p-12">
                                 <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
@@ -628,7 +692,15 @@ const PortfolioDetail = () => {
                                                     src={avatarUrl}
                                                     alt={portfolio.titre}
                                                     className="w-full h-full object-cover"
-                                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                                    onError={(e) => { 
+                                                        e.target.style.display = 'none'; 
+                                                        const parent = e.target.parentElement;
+                                                        parent.innerHTML = `
+                                                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 text-white text-4xl">
+                                                                ${portfolio.titre?.charAt(0) || 'P'}
+                                                            </div>
+                                                        `;
+                                                    }}
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 text-white text-4xl">
@@ -666,6 +738,12 @@ const PortfolioDetail = () => {
                                                     <span className="px-3 py-1.5 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 text-sm font-medium rounded-full">
                                                         Portfolio créatif
                                                     </span>
+                                                    {/* Afficher si photo_template existe */}
+                                                    {templateImageUrl && (
+                                                        <span className="px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 text-sm font-medium rounded-full">
+                                                            🖼️ Template appliqué
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -687,19 +765,19 @@ const PortfolioDetail = () => {
 
                                         {/* Stats Bar */}
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-                                            <div className="bg-gradient-to-br from-blue-50/90 to-blue-100/90 backdrop-blur-sm p-4 rounded-2xl border border-white/50">
+                                            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-2xl border border-blue-200">
                                                 <div className="text-2xl font-bold text-blue-700 mb-1">{projets.length}</div>
                                                 <div className="text-sm text-blue-600">Projets</div>
                                             </div>
-                                            <div className="bg-gradient-to-br from-green-50/90 to-green-100/90 backdrop-blur-sm p-4 rounded-2xl border border-white/50">
+                                            <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-2xl border border-green-200">
                                                 <div className="text-2xl font-bold text-green-700 mb-1">{competences.length}</div>
                                                 <div className="text-sm text-green-600">Compétences</div>
                                             </div>
-                                            <div className="bg-gradient-to-br from-purple-50/90 to-purple-100/90 backdrop-blur-sm p-4 rounded-2xl border border-white/50">
+                                            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-2xl border border-purple-200">
                                                 <div className="text-2xl font-bold text-purple-700 mb-1">{calculateTotalExperience()}</div>
                                                 <div className="text-sm text-purple-600">Années d'exp.</div>
                                             </div>
-                                            <div className="bg-gradient-to-br from-orange-50/90 to-orange-100/90 backdrop-blur-sm p-4 rounded-2xl border border-white/50">
+                                            <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-2xl border border-orange-200">
                                                 <div className="text-2xl font-bold text-orange-700 mb-1">{contacts.length}</div>
                                                 <div className="text-sm text-orange-600">Contacts</div>
                                             </div>
@@ -718,7 +796,7 @@ const PortfolioDetail = () => {
                         <aside className="w-full lg:w-1/3">
                             <div className="space-y-6">
                                 {/* About Section */}
-                                <div className="bg-gradient-to-br from-white/90 to-gray-50/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/50">
+                                <div className="bg-white rounded-3xl p-6 shadow-xl border border-gray-200">
                                     <div className="flex items-center gap-3 mb-6">
                                         <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
                                             <span className="text-2xl text-white">👤</span>
@@ -744,7 +822,7 @@ const PortfolioDetail = () => {
 
                                 {/* Contacts Section */}
                                 {contacts.length > 0 && (
-                                    <div className="bg-gradient-to-br from-white/90 to-gray-50/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/50">
+                                    <div className="bg-white rounded-3xl p-6 shadow-xl border border-gray-200">
                                         <div className="flex items-center gap-3 mb-6">
                                             <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
                                                 <span className="text-2xl text-white">📞</span>
@@ -761,7 +839,7 @@ const PortfolioDetail = () => {
 
                                 {/* Skills Overview */}
                                 {competences.length > 0 && (
-                                    <div className="bg-gradient-to-br from-white/90 to-gray-50/90 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-white/50">
+                                    <div className="bg-white rounded-3xl p-6 shadow-xl border border-gray-200">
                                         <div className="flex items-center gap-3 mb-6">
                                             <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
                                                 <span className="text-2xl text-white">💼</span>
@@ -770,7 +848,7 @@ const PortfolioDetail = () => {
                                         </div>
                                         <div className="grid grid-cols-2 gap-3">
                                             {competences.slice(0, 8).map((s, i) => (
-                                                <div key={i} className="px-4 py-3 bg-gradient-to-r from-gray-50/90 to-white/90 backdrop-blur-sm border border-white/50 rounded-xl hover:border-purple-300 transition">
+                                                <div key={i} className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl hover:border-purple-300 transition">
                                                     <div className="text-sm font-semibold text-gray-900 mb-1">{s.nom_competence}</div>
                                                     {s.niveau_competence && (
                                                         <div className="text-xs text-gray-500">{s.niveau_competence}</div>
@@ -808,8 +886,8 @@ const PortfolioDetail = () => {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {projets.length === 0 ? (
-                                        <div className="col-span-2 bg-gradient-to-br from-gray-50/90 to-white/90 backdrop-blur-sm p-12 rounded-3xl text-center border border-white/50">
-                                            <div className="w-24 h-24 mx-auto bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center text-4xl mb-6">
+                                        <div className="col-span-2 bg-gray-50 p-12 rounded-3xl text-center border border-gray-200">
+                                            <div className="w-24 h-24 mx-auto bg-gray-200 rounded-full flex items-center justify-center text-4xl mb-6">
                                                 📁
                                             </div>
                                             <h3 className="text-2xl font-bold text-gray-800 mb-3">Aucun projet</h3>
@@ -851,7 +929,7 @@ const PortfolioDetail = () => {
                                                     : null;
 
                                                 return (
-                                                    <div key={idx} className="group bg-gradient-to-br from-white/90 to-gray-50/90 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/50 hover:border-blue-300 transition-all duration-300 hover:scale-[1.01]">
+                                                    <div key={idx} className="group bg-white rounded-3xl p-6 shadow-lg border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:scale-[1.01]">
                                                         <div className="flex flex-col lg:flex-row lg:items-start gap-6">
                                                             <div className="flex-shrink-0">
                                                                 <div className="w-20 h-20 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center">
@@ -916,7 +994,7 @@ const PortfolioDetail = () => {
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             {formations.map((f, idx) => (
-                                                <div key={idx} className="bg-gradient-to-br from-white/90 to-gray-50/90 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/50 hover:border-green-300 transition-all duration-300 hover:scale-[1.01]">
+                                                <div key={idx} className="bg-white rounded-3xl p-6 shadow-lg border border-gray-200 hover:border-green-300 transition-all duration-300 hover:scale-[1.01]">
                                                     <div className="flex items-center gap-4 mb-4">
                                                         <div className="w-14 h-14 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl flex items-center justify-center">
                                                             <span className="text-2xl">📚</span>

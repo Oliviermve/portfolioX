@@ -643,7 +643,7 @@ const TemplateDetail = () => {
                 
                 // Rediriger vers l'édition du portfolio
                 setTimeout(() => {
-                    navigate(`/portfolio/edit/${existingPortfolioId}`);
+                    navigate(`/portfolioDetail/${existingPortfolioId}`);
                 }, 1500);
             } else {
                 // Créer un nouveau portfolio
@@ -652,7 +652,7 @@ const TemplateDetail = () => {
                 
                 // Rediriger vers l'édition du nouveau portfolio
                 setTimeout(() => {
-                    navigate(`/portfolio/edit/${portfolioId}`);
+                    navigate(`/portfolioDetail/${portfolioId}`);
                 }, 1500);
             }
         } catch (err) {
@@ -1040,7 +1040,7 @@ const TemplateDetail = () => {
                                 {/* Lien vers le portfolio existant */}
                                 {isAuthenticated && hasExistingPortfolio && existingPortfolioId && (
                                     <button
-                                        onClick={() => navigate(`/portfolio/edit/${existingPortfolioId}`)}
+                                        onClick={() => navigate(`/portfolioDetail/${existingPortfolioId}`)}
                                         className="w-full py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all duration-300"
                                     >
                                         <div className="flex items-center justify-center gap-2">
