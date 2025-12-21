@@ -603,179 +603,208 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="flex items-center justify-between py-4 px-6 lg:px-20 bg-white shadow-sm">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center">
+      <nav className="flex items-center justify-between py-1.5 px-3 lg:px-4 bg-white shadow-sm">
+        {/* Logo - taille réduite de 20% */}
+        <div className="flex items-center">
+          <Link to="/" className="flex items-center gap-1.5 hover:opacity-90 transition-opacity">
+            <div className="w-6.5 h-6.5 rounded-full flex items-center justify-center overflow-hidden">
               <img 
                 src="/logo/logo.png" 
                 alt="PortfoliX Logo" 
                 className="w-full h-full object-contain"
               />
             </div>
-            <span className="font-bold text-xl text-gray-800 hover:text-purple-600 transition">
+            <span className="font-bold text-lg bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
               PortfoliX
             </span>
           </Link>
         </div>
 
-        {/* Navigation centrale */}
-        <ul className="hidden md:flex items-center gap-8 text-gray-700">
-          <li className="hover:text-purple-600 transition">
+        {/* Navigation centrale - taille réduite */}
+        <ul className="hidden lg:flex items-center gap-6 text-gray-700 text-sm">
+          <li className="hover:text-purple-600 transition-colors">
             <Link 
               to="/" 
-              className="pb-1 border-b-2 border-transparent hover:border-purple-600"
+              className="pb-0.5 border-b-2 border-transparent hover:border-purple-600 font-medium"
             >
               Home
             </Link>
           </li>
-          <li className="hover:text-purple-600 transition">
+          <li className="hover:text-purple-600 transition-colors">
             <Link 
               to="/models" 
-              className="pb-1 border-b-2 border-transparent hover:border-purple-600"
+              className="pb-0.5 border-b-2 border-transparent hover:border-purple-600 font-medium"
             >
               Models
             </Link>
           </li>
-          <li className="hover:text-purple-600 transition">
-                <Link 
-                  to="/edit" 
-                  className="pb-1 border-b-2 border-transparent hover:border-purple-600"
-                >
-                  Edit
-                </Link>
-              </li>
+          <li className="hover:text-purple-600 transition-colors">
+            <Link 
+              to="/edit" 
+              className="pb-0.5 border-b-2 border-transparent hover:border-purple-600 font-medium"
+            >
+              Edit
+            </Link>
+          </li>
           {isAuthenticated && (
             <>
-              <li className="hover:text-purple-600 transition">
+              <li className="hover:text-purple-600 transition-colors">
                 <Link 
                   to="/portfolio" 
-                  className="pb-1 border-b-2 border-transparent hover:border-purple-600"
+                  className="pb-0.5 border-b-2 border-transparent hover:border-purple-600 font-medium"
                 >
                   Create
                 </Link>
               </li>
-              
+              <li className="hover:text-purple-600 transition-colors">
+                <Link 
+                  to="/my-portfolios" 
+                  className="pb-0.5 border-b-2 border-transparent hover:border-purple-600 font-medium"
+                >
+                  My Portfolios
+                </Link>
+              </li>
             </>
           )}
         </ul>
 
-        {/* Barre de recherche */}
-        <div className="hidden lg:block flex-1 max-w-md mx-8">
+        {/* Barre de recherche - taille réduite */}
+        <div className="hidden lg:block w-full max-w-xs mx-4">
           <form onSubmit={handleSearch} className="relative">
-            <input
-              type="text"
-              placeholder="Search portfolios..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full border border-gray-300 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-            />
-            <span className="absolute top-2.5 left-3 text-gray-400">🔍</span>
-            <button 
-              type="submit" 
-              className="absolute top-2 right-3 text-xs text-purple-600 hover:text-purple-700"
-            >
-              Search
-            </button>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search portfolios..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full border border-gray-300 rounded-full pl-8 pr-20 py-1.5 text-xs focus:outline-none focus:ring-1.5 focus:ring-purple-500/25 focus:border-purple-400 transition-all"
+              />
+              <span className="absolute top-1/2 left-2.5 -translate-y-1/2 text-gray-400 text-xs">🔍</span>
+              <button 
+                type="submit" 
+                className="absolute top-1/2 right-1.5 -translate-y-1/2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-0.5 rounded-full text-[10px] font-medium hover:from-purple-700 hover:to-blue-700 transition-all"
+              >
+                Search
+              </button>
+            </div>
           </form>
         </div>
 
-        {/* Section utilisateur */}
-        <div className="flex items-center gap-4">
+        {/* Section utilisateur - taille réduite */}
+        <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <>
-              {/* Menu déroulant utilisateur */}
+              {/* Bouton Create réduit */}
+              <Link 
+                to="/portfolio/create" 
+                className="hidden lg:block px-3 py-1.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all text-xs font-medium"
+              >
+                + Create
+              </Link>
+
+              {/* Menu déroulant utilisateur réduit */}
               <div className="relative group">
                 <button 
-                  className="flex items-center gap-2 hover:bg-gray-100 rounded-full px-3 py-1.5 transition"
+                  className="flex items-center gap-1.5 hover:bg-gray-50 rounded-md px-2 py-1 transition-all"
+                  aria-label="Menu utilisateur"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-xs">
                     {getInitials(userData)}
                   </div>
-                  <span className="hidden md:inline text-sm font-medium text-gray-700">
-                    {getFirstName(userData)}
-                  </span>
-                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <div className="hidden xl:block text-left">
+                    <span className="block text-xs font-medium text-gray-900">
+                      {getFirstName(userData)}
+                    </span>
+                  </div>
+                  <svg 
+                    className="w-3 h-3 text-gray-500 group-hover:text-gray-700 transition-colors" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
                 </button>
                 
-                {/* Menu déroulant */}
-                <div className="absolute right-0 top-12 w-56 bg-white rounded-xl shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <div className="py-2">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="font-medium text-gray-800 text-sm">
-                        {getDisplayName(userData)}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {userData?.email || 'Email non disponible'}
-                      </p>
+                {/* Menu déroulant réduit */}
+                <div className="absolute right-0 top-9 w-44 bg-white rounded-md shadow-md border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 transform translate-y-1 group-hover:translate-y-0">
+                  <div className="py-0.5">
+                    {/* En-tête utilisateur réduit */}
+                    <div className="px-2.5 py-2 border-b border-gray-100">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-xs">
+                          {getInitials(userData)}
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900 text-xs">
+                            {getDisplayName(userData)}
+                          </p>
+                          <p className="text-[10px] text-gray-500 truncate max-w-[120px]">
+                            {userData?.email || 'Email'}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                     
-                    <Link 
-                      to="/profile" 
-                      className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                    >
-                      <span className="mr-3">👤</span>
-                      Mon profil
-                    </Link>
-                    <Link 
-                      to="/my-portfolios" 
-                      className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                    >
-                      <span className="mr-3">📂</span>
-                      Mes portfolios
-                    </Link>
-                    <Link 
-                      to="/settings" 
-                      className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                    >
-                      <span className="mr-3">⚙️</span>
-                      Paramètres
-                    </Link>
-                    
-                    <div className="border-t border-gray-100 my-1"></div>
-                    
-                    <button
-                      onClick={handleLogout}
-                      disabled={loading}
-                      className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
-                    >
-                      {loading ? (
-                        <>
-                          <span className="mr-3">⏳</span>
-                          Déconnexion...
-                        </>
-                      ) : (
-                        <>
-                          <span className="mr-3">🚪</span>
-                          Déconnexion
-                        </>
-                      )}
-                    </button>
+                    {/* Liens du menu réduits */}
+                    <div className="py-0.5">
+                      <Link 
+                        to="/profile" 
+                        className="flex items-center px-2.5 py-1.5 text-xs text-gray-700 hover:bg-gray-50 hover:text-purple-600 transition-colors"
+                      >
+                        <span className="mr-1.5">👤</span>
+                        <span>My Profile</span>
+                      </Link>
+                      <Link 
+                        to="/my-portfolios" 
+                        className="flex items-center px-2.5 py-1.5 text-xs text-gray-700 hover:bg-gray-50 hover:text-purple-600 transition-colors"
+                      >
+                        <span className="mr-1.5">📂</span>
+                        <span>My Portfolios</span>
+                      </Link>
+                      <Link 
+                        to="/settings" 
+                        className="flex items-center px-2.5 py-1.5 text-xs text-gray-700 hover:bg-gray-50 hover:text-purple-600 transition-colors"
+                      >
+                        <span className="mr-1.5">⚙️</span>
+                        <span>Settings</span>
+                      </Link>
+                      
+                      <div className="border-t border-gray-100 my-0.5"></div>
+                      
+                      <button
+                        onClick={handleLogout}
+                        disabled={loading}
+                        className="flex items-center w-full px-2.5 py-1.5 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                      >
+                        {loading ? (
+                          <>
+                            <span className="mr-1.5">⏳</span>
+                            <span>Logging out...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="mr-1.5">🚪</span>
+                            <span>Logout</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              <Link 
-                to="/portfolio/create" 
-                className="lg:hidden px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition text-sm font-medium"
-              >
-                + Create
-              </Link>
             </>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <button 
                 onClick={openLoginModal}
-                className="px-4 py-2 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition text-sm font-medium"
+                className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-purple-500 hover:text-purple-600 transition-all text-xs font-medium"
               >
                 Login
               </button>
               <button 
                 onClick={openRegisterModal}
-                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition text-sm font-medium hidden md:block"
+                className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all text-xs font-medium"
               >
                 Sign Up
               </button>
@@ -784,7 +813,7 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Modale d'authentification */}
+      {/* Modale d'authentification (inchangée) */}
       {showAuthModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Overlay flouté */}

@@ -244,7 +244,7 @@ const MyPortfolio = () => {
   };
 
   const handleCreateNewPortfolio = () => {
-    navigate('/portfolio/create');
+    navigate('/portfolio');
   };
 
   const handleEditPortfolio = (portfolioId) => {

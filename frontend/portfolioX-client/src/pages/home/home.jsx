@@ -14,8 +14,11 @@ const Home = () => {
         <Navbar />
       </div>
       <div className="pt-16"> 
-       
-        <Hero />
+       <section className="py-5 px-6 lg:px-20 bg-gray-900 text-white bg-gradient-to-b from-violet-950 via-blue-800
+        to-white">
+          <Hero />
+       </section>
+      
         <Features />
         <Pricing />
         <Footer />

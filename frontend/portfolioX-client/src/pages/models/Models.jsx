@@ -1167,7 +1167,7 @@ const Models = () => {
 
   return (
     
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 px-4 md:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-vwhite via-violet-300 to-violet-balck px-4 md:px-8 py-8">
       {/* Header */}
       <header className="flex justify-between items-center mb-12">
         <div><div className="fixed top-0 left-0 right-0 z-50">

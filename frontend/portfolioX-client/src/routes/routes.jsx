@@ -12,6 +12,7 @@ import MyPortfolio from '../pages/portfolio/MyPortfolio'
 import Models from '../pages/models/Models'
 import TemplatePreview from '../pages/editPage/components/template_preview'
 import TemplateDetail from '../pages/models/TemplateDetail'
+import EditPortfolio from '../pages/portfolio/EditPortfolio'
 
 const AppRoutes = () => {
   return (
@@ -21,7 +22,6 @@ const AppRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/public" element={<Public />} />
-        <Route path="/edit" element={<EditPage />} />
         <Route path="/portfolio" element={<Create_portfolio />} />
         <Route path="/portfolioDetail/:id" element={<PortfolioDetail />} /> 
         <Route path="/profile" element={<Profile />} />
@@ -29,6 +29,7 @@ const AppRoutes = () => {
         <Route path="models/" element={<Models/>}/>
         <Route path="templatePreview/" element={<TemplatePreview/>}/>
         <Route path="/template/:id" element={<TemplateDetail />} />
+        <Route path="/edit" element={<EditPortfolio />} />
       </Routes>
     </BrowserRouter>
   )

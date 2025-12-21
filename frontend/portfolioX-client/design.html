@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: white;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .multiplication-container {
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .equation {
+            font-size: 48px;
+            margin-bottom: 30px;
+            white-space: nowrap;
+        }
+        
+        .visual-multiplication {
+            display: inline-block;
+            text-align: right;
+            font-size: 48px;
+            line-height: 1.2;
+        }
+        
+        .first-number {
+            margin-right: 20px;
+        }
+        
+        .second-number {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        .multiplication-sign {
+            margin-right: 10px;
+        }
+        
+        .result {
+            border-top: 3px solid black;
+            padding-top: 5px;
+            margin-top: 5px;
+        }
+        
+        .digit {
+            display: inline-block;
+            width: 40px;
+            text-align: center;
+        }
+        
+        /* Couleurs exactes comme dans l'image */
+        .color1 { color: #e53935; } /* Rouge pour les 1 */
+        .color2 { color: #43a047; } /* Vert pour les points */
+        .color3 { color: #fb8c00; } /* Orange pour les 2 */
+        .color4 { color: #1e88e5; } /* Bleu pour les 0 */
+        .color5 { color: #8e24aa; } /* Violet pour les 5 */
+        .color6 { color: #00acc1; } /* Cyan pour les 4 */
+        .color7 { color: #fdd835; } /* Jaune pour les 8 */
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const MultiplicationDisplay = () => {
+            return (
+                <div className="multiplication-container">
+                    {/* Première ligne : 1 . 2 × 0 . 5 = 0 . 4 8 */}
+                    <div className="equation">
+                        <span className="digit color1">1</span>
+                        <span className="digit color2">.</span>
+                        <span className="digit color3">2</span>
+                        <span> × </span>
+                        <span className="digit color4">0</span>
+                        <span className="digit color2">.</span>
+                        <span className="digit color5">5</span>
+                        <span> = </span>
+                        <span className="digit color4">0</span>
+                        <span className="digit color2">.</span>
+                        <span className="digit color6">4</span>
+                        <span className="digit color7">8</span>
+                    </div>
+                    
+                    {/* Représentation visuelle de la multiplication */}
+                    <div className="visual-multiplication">
+                        {/* Première ligne : 1 . 2 */}
+                        <div className="first-number">
+                            <span className="digit color1">1</span>
+                            <span className="digit color2">.</span>
+                            <span className="digit color3">2</span>
+                        </div>
+                        
+                        {/* Deuxième ligne : × 0 . 5 */}
+                        <div className="second-number">
+                            <span className="multiplication-sign">×</span>
+                            <span className="digit color4">0</span>
+                            <span className="digit color2">.</span>
+                            <span className="digit color5">5</span>
+                        </div>
+                        
+                        {/* Ligne de résultat avec trait au-dessus : 0 . 4 8 */}
+                        <div className="result">
+                            <span className="digit color4">0</span>
+                            <span className="digit color2">.</span>
+                            <span className="digit color6">4</span>
+                            <span className="digit color7">8</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<MultiplicationDisplay />);
+    </script>
+</body>
+</html>
